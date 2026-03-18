@@ -1,0 +1,280 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+
+\geometry{margin=2.5cm}
+
+\lstdefinestyle{cppstyle}{
+    language=C++,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!40!black},
+    stringstyle=\color{red!60!black},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single
+}
+
+\title{Rapport de TP1 \\ Troisi\`eme Partie}
+\author{Nom : \`a compl\'eter \\ Fili\`ere : \`a compl\'eter}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+La troisi\`eme partie du TP1 porte sur l'exploitation de la classe \texttt{RECTANGLE} d\'evelopp\'ee dans les parties pr\'ec\'edentes. Elle regroupe deux objectifs principaux :
+\begin{itemize}[leftmargin=*]
+    \item calculer l'intersection de plusieurs rectangles saisis par l'utilisateur ;
+    \item adapter la repr\'esentation d'un rectangle en rempla\c{c}ant les quatre entiers \texttt{X1, Y1, X2, Y2} par deux objets de la classe \texttt{POINT}.
+\end{itemize}
+
+Cette partie permet donc de passer d'une simple impl\'ementation de m\'ethodes \`a une approche plus structur\'ee, fond\'ee sur la r\'eutilisation du code, la composition d'objets et l'organisation orient\'ee objet.
+
+\section{Rappel de l'\'enonc\'e}
+\subsection{Exercice 16}
+\'Ecrire un programme qui calcule et affiche l'intersection de plusieurs rectangles contenus dans un tableau de rectangles saisis par l'utilisateur. L'\'enonc\'e pr\'ecise que l'on doit utiliser la deuxi\`eme version de la fonction \texttt{intersection}.
+
+\subsection{Exercice 17}
+Reprendre certaines questions du TP en consid\'erant cette fois qu'un objet de la classe \texttt{RECTANGLE} est d\'efini par deux objets de la classe \texttt{POINT} et non plus par quatre entiers.
+
+\section{Objectifs de la troisi\`eme partie}
+Les objectifs techniques sont les suivants :
+\begin{enumerate}[leftmargin=*]
+    \item r\'eutiliser la fonction \texttt{intersection(const Rectangle\&, Rectangle\&)} pour traiter plusieurs rectangles ;
+    \item manipuler un tableau ou une collection de rectangles ;
+    \item introduire la composition en d\'efinissant un rectangle par deux objets \texttt{Point} ;
+    \item conserver la m\^eme logique g\'eom\'etrique tout en faisant \'evoluer la repr\'esentation interne.
+\end{enumerate}
+
+\section{Analyse de l'exercice 16}
+\subsection{Principe}
+Pour calculer l'intersection de plusieurs rectangles, il ne suffit pas de comparer tous les rectangles deux \`a deux de mani\`ere ind\'ependante. La bonne m\'ethode consiste \`a :
+\begin{enumerate}[leftmargin=*]
+    \item prendre le premier rectangle comme intersection courante ;
+    \item calculer l'intersection entre ce rectangle courant et le deuxi\`eme rectangle ;
+    \item remplacer le rectangle courant par le r\'esultat obtenu ;
+    \item recommencer jusqu'au dernier rectangle.
+\end{enumerate}
+
+Si \`a une \'etape l'intersection est vide, alors l'intersection globale est vide.
+
+\subsection{Pourquoi utiliser la deuxi\`eme version de \texttt{intersection}}
+La premi\`ere version renvoie un rectangle. Si l'intersection est vide, elle renvoie \texttt{(0,0,0,0)}. Cette solution est ambigu\"e car \texttt{(0,0,0,0)} peut aussi repr\'esenter un cas valide.
+
+La deuxi\`eme version est plus rigoureuse :
+\begin{lstlisting}[style=cppstyle]
+bool intersection(const Rectangle& r, Rectangle& resultat) const;
+\end{lstlisting}
+
+Elle renvoie :
+\begin{itemize}[leftmargin=*]
+    \item \texttt{true} si l'intersection existe ;
+    \item \texttt{false} si l'intersection est vide.
+\end{itemize}
+
+Le rectangle d'intersection est alors plac\'e dans le deuxi\`eme param\`etre.
+
+\subsection{Algorithme propos\'e}
+\begin{lstlisting}[style=cppstyle]
+Rectangle courant = rectangles[0];
+
+for (size_t i = 1; i < rectangles.size(); ++i) {
+    Rectangle resultat;
+    if (!courant.intersection(rectangles[i], resultat)) {
+        // Intersection globale vide
+        return;
+    }
+    courant = resultat;
+}
+\end{lstlisting}
+
+Cette m\'ethode est simple, progressive et \'evite la duplication de code.
+
+\section{Impl\'ementation de l'exercice 16}
+Dans le fichier \texttt{main.cpp}, une fonction auxiliaire a \'et\'e utilis\'ee pour afficher l'intersection globale d'un tableau de rectangles. Le traitement repose enti\`erement sur la fonction \texttt{intersection} d\'ej\`a d\'efinie dans la classe.
+
+L'int\'er\^et de cette solution est qu'elle ne modifie pas la logique de la classe \texttt{Rectangle}. On exploite simplement les outils construits dans les parties pr\'ec\'edentes.
+
+\subsection{Complexit\'e}
+Si le tableau contient $n$ rectangles, on effectue $n-1$ calculs d'intersection. La complexit\'e est donc lin\'eaire en $O(n)$, ce qui est satisfaisant pour ce probl\`eme.
+
+\section{Analyse de l'exercice 17}
+\subsection{Nouvelle repr\'esentation}
+Dans les premi\`eres parties du TP, un rectangle est d\'efini par quatre entiers :
+\[
+X1,\;Y1,\;X2,\;Y2
+\]
+
+Dans l'exercice 17, la repr\'esentation devient plus orient\'ee objet :
+\begin{itemize}[leftmargin=*]
+    \item un point \texttt{hautGauche} ;
+    \item un point \texttt{basDroite}.
+\end{itemize}
+
+On a donc une relation de composition : un rectangle est compos\'e de deux objets \texttt{Point}.
+
+\subsection{Int\'er\^et de cette approche}
+Cette nouvelle repr\'esentation apporte plusieurs avantages :
+\begin{enumerate}[leftmargin=*]
+    \item elle rend le code plus lisible ;
+    \item elle rapproche l'impl\'ementation de la mod\'elisation g\'eom\'etrique ;
+    \item elle favorise la r\'eutilisation de la classe \texttt{Point} ;
+    \item elle met en pratique la composition en C++.
+\end{enumerate}
+
+\subsection{Adaptation des m\'ethodes}
+La logique des m\'ethodes reste presque identique. La diff\'erence principale est l'acc\`es aux coordonn\'ees, qui se fait maintenant \`a travers les accesseurs de la classe \texttt{Point}.
+
+Par exemple, au lieu d'\'ecrire :
+\begin{lstlisting}[style=cppstyle]
+x1_ < x2_
+\end{lstlisting}
+
+on manipule :
+\begin{lstlisting}[style=cppstyle]
+hautGauche_.abscisse()
+basDroite_.abscisse()
+\end{lstlisting}
+
+L'op\'eration d'ordonnancement reste n\'ecessaire afin de garantir que le premier point repr\'esente bien le coin sup\'erieur gauche et le second le coin inf\'erieur droit.
+
+\section{Choix de conception}
+Pour la solution propos\'ee, deux classes ont \'et\'e distingu\'ees :
+\begin{itemize}[leftmargin=*]
+    \item \texttt{Rectangle} : version bas\'ee sur quatre entiers, exposant l'ensemble des m\'ethodes des exercices 1 \`a 15 ;
+    \item \texttt{RectanglePoints} : version composant des \texttt{Point} et permettant de r\'epondre \`a l'exercice 17.
+\end{itemize}
+
+Ce choix pr\'esente un avantage p\'edagogique : il permet de comparer les deux mod\`eles sans perdre le travail d\'ej\`a r\'ealis\'e.
+
+\section{Documentation des classes et fonctions}
+\subsection{Anciennes classes et fonctions}
+\paragraph{La classe \texttt{Rectangle}}\mbox{}\\
+Elle est d\'efinie dans les parties pr\'ec\'edentes et fournit un jeu complet de constructeurs et de m\'ethodes :
+\begin{itemize}[leftmargin=*]
+    \item \texttt{Rectangle(int x1, int y1, int x2, int y2)} : constructeur principal qui appelle \texttt{ordonner()} pour garantir que $(x1,y1)$ est en haut \`a gauche ;
+    \item \texttt{Rectangle(const Point\&, const Point\&)} : surcharge utilisant deux \texttt{Point} ;
+    \item \texttt{void afficher(std::ostream\&)} et \texttt{void saisir(std::istream\&)} pour l'I/O ;
+    \item \texttt{bool carre() const}, \texttt{int surface() const} et \texttt{int position(const Point\&)} pour des tests g\'eom\'etriques ;
+    \item \texttt{void rotation90()} et \texttt{void translation(const Point\&)} pour transformer les rectangles ;
+    \item \texttt{int comparer(const Rectangle\&)} et \texttt{Rectangle reunion(const Rectangle\&)} pour comparer ou combiner deux rectangles ;
+    \item \texttt{Rectangle intersection(const Rectangle\&)} et \texttt{bool intersection(const Rectangle\&, Rectangle\&)} pour r\'ecuperer l'intersection.
+\end{itemize}
+
+La partie essentielle d'ordonnancement est rappel\'ee ici :
+\begin{lstlisting}[style=cppstyle]
+void Rectangle::ordonner() {
+    if (x1_ > x2_) std::swap(x1_, x2_);
+    if (y1_ > y2_) std::swap(y1_, y2_);
+}
+\end{lstlisting}
+
+\paragraph{Classe \texttt{Point}} Elle fournit un constructeur $(x, y)$, les accesseurs \texttt{abscisse()} et \texttt{ordonnee()} ainsi que les mutateurs \texttt{setAbscisse()} et \texttt{setOrdonnee()}, ce qui permet \`a \texttt{RectanglePoints} d'utiliser ces objets comme coins.
+
+\subsection{Nouvelles fonctions et classes introduites}
+\paragraph{Intersection bool\'eenne} Voici la version de l'exercice 16 qui renvoie un bool\'een :
+\begin{lstlisting}[style=cppstyle]
+bool Rectangle::intersection(const Rectangle& r, Rectangle& resultat) const;
+\end{lstlisting}
+Elle est d\'ecrite en d\'etail sur la page pr\'ec\'edente et permet de cha\^\i ner les intersections successives.
+
+\paragraph{Fonctions auxiliaires dans \texttt{main.cpp}} La nouvelle fonction \texttt{afficherIntersectionsMultiples()} illustre la logique :
+\begin{lstlisting}[style=cppstyle]
+void afficherIntersectionsMultiples(const std::vector<Rectangle>& rectangles);
+\end{lstlisting}
+Elle montre comment exploiter la m\'ethode bool\'eenne pour r\'eduire un tableau.
+
+\paragraph{Classe \texttt{RectanglePoints}} L'exercice 17 introduit cette classe, repr\'esent\'ee ci-dessous :
+\begin{lstlisting}[style=cppstyle]
+class RectanglePoints {
+public:
+    RectanglePoints(const Point& hautGauche = Point(), const Point& basDroite = Point());
+    int surface() const;
+    bool intersection(const RectanglePoints& r, RectanglePoints& resultat) const;
+private:
+    void ordonner();
+    Point hautGauche_;
+    Point basDroite_;
+};
+\end{lstlisting}
+Elle applique la m\^eme logique g\'eom\'etrique en utilisant des objets \texttt{Point}, ce qui montre une composition simple.
+
+\section{Tests effectu\'es}
+Les tests r\'ealis\'es ont permis de v\'erifier :
+\begin{itemize}[leftmargin=*]
+    \item le calcul correct de l'intersection de plusieurs rectangles ;
+    \item le comportement du programme lorsque l'intersection devient vide ;
+    \item la coh\'erence de la repr\'esentation avec deux objets \texttt{Point} ;
+    \item le bon fonctionnement des m\'ethodes \texttt{surface}, \texttt{position} et \texttt{intersection} dans la nouvelle version.
+\end{itemize}
+
+\section{Difficult\'es rencontr\'ees}
+Deux difficult\'es principales peuvent \^etre signal\'ees :
+\begin{enumerate}[leftmargin=*]
+    \item l'ambigu\"it\'e de la premi\`ere version de \texttt{intersection}, r\'esolue par l'utilisation d'une fonction retournant un bool\'een ;
+    \item l'adaptation des m\'ethodes lors du passage d'une repr\'esentation par entiers \`a une repr\'esentation par objets.
+\end{enumerate}
+
+\section{Conclusion}
+La troisi\`eme partie du TP a permis d'approfondir l'utilisation des classes en C++. L'exercice 16 montre comment r\'eutiliser efficacement une m\'ethode existante pour traiter une collection d'objets. L'exercice 17 introduit une conception plus orient\'ee objet, dans laquelle un rectangle est compos\'e de deux points.
+
+Cette partie constitue donc une transition importante entre une programmation bas\'ee sur des donn\'ees simples et une mod\'elisation plus structur\'ee des objets g\'eom\'etriques.
+
+\section*{Annexe : fichiers concern\'es}
+La solution propos\'ee s'appuie notamment sur les fichiers suivants :
+\begin{itemize}[leftmargin=*]
+    \item \texttt{Point.h}
+    \item \texttt{Rectangle.h}
+    \item \texttt{Rectangle.cpp}
+    \item \texttt{RectanglePoints.h}
+    \item \texttt{RectanglePoints.cpp}
+    \item \texttt{main.cpp}
+\end{itemize}
+
+\section*{Annexe : extraits de code}
+\subsection*{Rectangle}
+\begin{lstlisting}[style=cppstyle]
+class Rectangle {
+public:
+    Rectangle(int x1 = 0, int y1 = 0, int x2 = 0, int y2 = 0);
+    Rectangle(const Point& p1, const Point& p2);
+    bool intersection(const Rectangle& r, Rectangle& resultat) const;
+    Rectangle reunion(const Rectangle& r) const;
+    int position(const Point& p) const;
+private:
+    void ordonner();
+    int x1_, y1_, x2_, y2_;
+};
+\end{lstlisting}
+
+\subsection*{RectanglePoints}
+\begin{lstlisting}[style=cppstyle]
+class RectanglePoints {
+public:
+    RectanglePoints(const Point& hautGauche = Point(), const Point& basDroite = Point());
+    int surface() const;
+    bool intersection(const RectanglePoints& r, RectanglePoints& resultat) const;
+private:
+    void ordonner();
+    Point hautGauche_;
+    Point basDroite_;
+};
+\end{lstlisting}
+
+\end{document}

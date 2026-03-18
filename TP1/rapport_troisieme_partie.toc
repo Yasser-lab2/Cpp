@@ -1,0 +1,28 @@
+\babel@toc {french}{}\relax 
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {section}{\numberline {2}Rappel de l'\'enonc\'e}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Exercice 16}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Exercice 17}{2}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Objectifs de la troisi\`eme partie}{2}{section.3}%
+\contentsline {section}{\numberline {4}Analyse de l'exercice 16}{2}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Principe}{2}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Pourquoi utiliser la deuxi\`eme version de \texttt {intersection}}{3}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Algorithme propos\'e}{3}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Impl\'ementation de l'exercice 16}{3}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Complexit\'e}{3}{subsection.5.1}%
+\contentsline {section}{\numberline {6}Analyse de l'exercice 17}{3}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Nouvelle repr\'esentation}{3}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Int\'er\^et de cette approche}{4}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Adaptation des m\'ethodes}{4}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Choix de conception}{4}{section.7}%
+\contentsline {section}{\numberline {8}Documentation des classes et fonctions}{4}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Anciennes classes et fonctions}{4}{subsection.8.1}%
+\contentsline {paragraph}{La classe \texttt {Rectangle}}{4}{section*.2}%
+\contentsline {paragraph}{Classe \texttt {Point}}{5}{section*.3}%
+\contentsline {subsection}{\numberline {8.2}Nouvelles fonctions et classes introduites}{5}{subsection.8.2}%
+\contentsline {paragraph}{Intersection bool\'eenne}{5}{section*.4}%
+\contentsline {paragraph}{Fonctions auxiliaires dans \texttt {main.cpp}}{5}{section*.5}%
+\contentsline {paragraph}{Classe \texttt {RectanglePoints}}{5}{section*.6}%
+\contentsline {section}{\numberline {9}Tests effectu\'es}{6}{section.9}%
+\contentsline {section}{\numberline {10}Difficult\'es rencontr\'ees}{6}{section.10}%
+\contentsline {section}{\numberline {11}Conclusion}{6}{section.11}%
