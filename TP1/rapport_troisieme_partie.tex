@@ -109,6 +109,32 @@ Cette m\'ethode est simple, progressive et \'evite la duplication de code.
 \section{Impl\'ementation de l'exercice 16}
 Dans le fichier \texttt{main.cpp}, une fonction auxiliaire a \'et\'e utilis\'ee pour afficher l'intersection globale d'un tableau de rectangles. Le traitement repose enti\`erement sur la fonction \texttt{intersection} d\'ej\`a d\'efinie dans la classe.
 
+\paragraph{Fonction d'intersection globale} Le code suivant illustre la logique exacte employ\'ee :
+\begin{lstlisting}[style=cppstyle]
+void afficherIntersectionsMultiples(const std::vector<Rectangle>& rectangles) {
+    if (rectangles.empty()) {
+        std::cout << "Aucun rectangle saisi.\n";
+        return;
+    }
+
+    Rectangle courant = rectangles.front();
+    for (size_t i = 1; i < rectangles.size(); ++i) {
+        Rectangle resultat;
+        if (!courant.intersection(rectangles[i], resultat)) {
+            std::cout << "Intersection globale vide apres le rectangle " << i + 1 << ".\n";
+            return;
+        }
+        courant = resultat;
+    }
+
+    std::cout << "Intersection globale: ";
+    courant.afficher(std::cout);
+    std::cout << '\n';
+}
+\end{lstlisting}
+
+Cette fonction montre que chaque intersection successive remplace l'intersection courante, ce qui d\'emontre proprement l'\'enonc\'e de l'exercice 16.
+
 L'int\'er\^et de cette solution est qu'elle ne modifie pas la logique de la classe \texttt{Rectangle}. On exploite simplement les outils construits dans les parties pr\'ec\'edentes.
 
 \subsection{Complexit\'e}
@@ -190,7 +216,19 @@ void Rectangle::ordonner() {
 \subsection{Nouvelles fonctions et classes introduites}
 \paragraph{Intersection bool\'eenne} Voici la version de l'exercice 16 qui renvoie un bool\'een :
 \begin{lstlisting}[style=cppstyle]
-bool Rectangle::intersection(const Rectangle& r, Rectangle& resultat) const;
+bool Rectangle::intersection(const Rectangle& r, Rectangle& resultat) const {
+    const int ix1 = std::max(x1_, r.x1_);
+    const int iy1 = std::max(y1_, r.y1_);
+    const int ix2 = std::min(x2_, r.x2_);
+    const int iy2 = std::min(y2_, r.y2_);
+
+    if (ix1 > ix2 || iy1 > iy2) {
+        return false;
+    }
+
+    resultat = Rectangle(ix1, iy1, ix2, iy2);
+    return true;
+}
 \end{lstlisting}
 Elle est d\'ecrite en d\'etail sur la page pr\'ec\'edente et permet de cha\^\i ner les intersections successives.
 
@@ -214,6 +252,35 @@ private:
 };
 \end{lstlisting}
 Elle applique la m\^eme logique g\'eom\'etrique en utilisant des objets \texttt{Point}, ce qui montre une composition simple.
+\paragraph{Impl\'ementation des m\'ethodes} La classe reprend les m\'ethodes essentielles adaptées :
+\begin{lstlisting}[style=cppstyle]
+void RectanglePoints::ordonner() {
+    const int xMin = std::min(hautGauche_.abscisse(), basDroite_.abscisse());
+    const int yMin = std::min(hautGauche_.ordonnee(), basDroite_.ordonnee());
+    const int xMax = std::max(hautGauche_.abscisse(), basDroite_.abscisse());
+    const int yMax = std::max(hautGauche_.ordonnee(), basDroite_.ordonnee());
+
+    hautGauche_.setAbscisse(xMin);
+    hautGauche_.setOrdonnee(yMin);
+    basDroite_.setAbscisse(xMax);
+    basDroite_.setOrdonnee(yMax);
+}
+
+bool RectanglePoints::intersection(const RectanglePoints& r, RectanglePoints& resultat) const {
+    const int ix1 = std::max(hautGauche_.abscisse(), r.hautGauche_.abscisse());
+    const int iy1 = std::max(hautGauche_.ordonnee(), r.hautGauche_.ordonnee());
+    const int ix2 = std::min(basDroite_.abscisse(), r.basDroite_.abscisse());
+    const int iy2 = std::min(basDroite_.ordonnee(), r.basDroite_.ordonnee());
+
+    if (ix1 > ix2 || iy1 > iy2) {
+        return false;
+    }
+
+    resultat = RectanglePoints(Point(ix1, iy1), Point(ix2, iy2));
+    return true;
+}
+\end{lstlisting}
+Cette adaptation reste proche de la classe initiale ; seule la source des coordonn\'ees change, ce qui illustre clairement l'exercice 17.
 
 \section{Tests effectu\'es}
 Les tests r\'ealis\'es ont permis de v\'erifier :
