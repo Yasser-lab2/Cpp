@@ -1,0 +1,184 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{amsmath}
+
+\geometry{margin=2.5cm}
+
+\lstdefinestyle{cppstyle}{
+    language=C++,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!40!black},
+    stringstyle=\color{red!60!black},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single
+}
+
+\title{Rapport TP1 – Troisi\`eme Partie (code)}
+\author{Nom : \`a compl\'eter \\ Fili\`ere : \`a compl\'eter}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Exercice 16 – Calculer l'intersection de plusieurs rectangles}
+\paragraph{}
+L'exercice 16 repose sur une unique fonction bool\'eenne \texttt{Rectangle::intersection} associ\'ee \`a une boucle d'intersection successive. Ce rapport met l'accent sur le code qui rend la d\'emonstration concr\`ete : la d\'etection d'un chevauchement et la r\'eduction d'un tableau de rectangles \`a un seul objet commun.
+
+\subsection{Intersection bool\'eenne}
+La fonction suivante compare les axes x et y et ne retourne une intersection que si les bornes se chevauchent.
+\begin{lstlisting}[style=cppstyle]
+bool Rectangle::intersection(const Rectangle& r, Rectangle& resultat) const {
+    const int ix1 = std::max(x1_, r.x1_);
+    const int iy1 = std::max(y1_, r.y1_);
+    const int ix2 = std::min(x2_, r.x2_);
+    const int iy2 = std::min(y2_, r.y2_);
+
+    if (ix1 > ix2 || iy1 > iy2) {
+        return false;
+    }
+
+    resultat = Rectangle(ix1, iy1, ix2, iy2);
+    return true;
+}
+\end{lstlisting}
+
+\paragraph{}
+Cette version bool\'eenne supprime l'ambigu\"ite du tuple $(0,0,0,0)$ et sert de fondement \`a la boucle suivante.
+
+\subsection{Intersection d'une collection}
+On applique la fonction pr\'ec\'edente sur chaque rectangle d'un tableau pour conserver l'intersection courante.
+\begin{lstlisting}[style=cppstyle]
+void afficherIntersectionsMultiples(const std::vector<Rectangle>& rectangles) {
+    if (rectangles.empty()) {
+        std::cout << "Aucun rectangle saisi.\n";
+        return;
+    }
+
+    Rectangle courant = rectangles.front();
+    for (size_t i = 1; i < rectangles.size(); ++i) {
+        Rectangle resultat;
+        if (!courant.intersection(rectangles[i], resultat)) {
+            std::cout << "Intersection globale vide apres le rectangle " << i + 1 << ".\n";
+            return;
+        }
+        courant = resultat;
+    }
+
+    std::cout << "Intersection globale: ";
+    courant.afficher(std::cout);
+    std::cout << '\n';
+}
+\end{lstlisting}
+
+\paragraph{}
+La boucle s'arrête dès qu'une intersection est vide, ce qui respecte la sémantique attendue : l'intersection globale n'existe plus.
+
+\subsection{Structure complète de \texttt{Rectangle}}
+Le cadrage précis de toutes les méthodes pertinentes rappelle que l'exercice tire parti des fonctions existantes.
+\begin{lstlisting}[style=cppstyle]
+class Rectangle {
+public:
+    Rectangle(int x1 = 0, int y1 = 0, int x2 = 0, int y2 = 0);
+    Rectangle(const Point& p1, const Point& p2);
+
+    void afficher(std::ostream& os) const;
+    void saisir(std::istream& is);
+
+    bool carre() const;
+    int surface() const;
+    void rotation90();
+    int position(const Point& p) const;
+    void translation(const Point& p);
+    int comparer(const Rectangle& r) const;
+    int position(const Rectangle& r) const;
+    Rectangle reunion(const Rectangle& r) const;
+    Rectangle intersection(const Rectangle& r) const;
+    bool intersection(const Rectangle& r, Rectangle& resultat) const;
+
+private:
+    void ordonner();
+    int x1_;
+    int y1_;
+    int x2_;
+    int y2_;
+};
+\end{lstlisting}
+
+\section{Exercice 17 – Rectangle définie par deux points}
+\paragraph{}
+L'exercice 17 demande de recomposer la classe \texttt{Rectangle} en utilisant des objets \texttt{Point}. La solution garde la même logique qu'auparavant, mais change la représentation interne pour illustrer la composition.
+
+\subsection{Déclaration de \texttt{RectanglePoints}}
+\begin{lstlisting}[style=cppstyle]
+class RectanglePoints {
+public:
+    RectanglePoints(const Point& hautGauche = Point(), const Point& basDroite = Point());
+
+    void afficher(std::ostream& os) const;
+    int surface() const;
+    bool carre() const;
+    int position(const Point& p) const;
+    RectanglePoints reunion(const RectanglePoints& r) const;
+    bool intersection(const RectanglePoints& r, RectanglePoints& resultat) const;
+
+private:
+    void ordonner();
+
+    Point hautGauche_;
+    Point basDroite_;
+};
+\end{lstlisting}
+
+\paragraph{}
+Cette interface conserve l'ensemble des opérations du rectangle à quatre entiers, mais délègue la gestion des coordonnées aux objets \texttt{Point}.
+
+\subsection{Ordonnancement et intersection}
+\begin{lstlisting}[style=cppstyle]
+void RectanglePoints::ordonner() {
+    const int xMin = std::min(hautGauche_.abscisse(), basDroite_.abscisse());
+    const int yMin = std::min(hautGauche_.ordonnee(), basDroite_.ordonnee());
+    const int xMax = std::max(hautGauche_.abscisse(), basDroite_.abscisse());
+    const int yMax = std::max(hautGauche_.ordonnee(), basDroite_.ordonnee());
+
+    hautGauche_.setAbscisse(xMin);
+    hautGauche_.setOrdonnee(yMin);
+    basDroite_.setAbscisse(xMax);
+    basDroite_.setOrdonnee(yMax);
+}
+
+bool RectanglePoints::intersection(const RectanglePoints& r, RectanglePoints& resultat) const {
+    const int ix1 = std::max(hautGauche_.abscisse(), r.hautGauche_.abscisse());
+    const int iy1 = std::max(hautGauche_.ordonnee(), r.hautGauche_.ordonnee());
+    const int ix2 = std::min(basDroite_.abscisse(), r.basDroite_.abscisse());
+    const int iy2 = std::min(basDroite_.ordonnee(), r.basDroite_.ordonnee());
+
+    if (ix1 > ix2 || iy1 > iy2) {
+        return false;
+    }
+
+    resultat = RectanglePoints(Point(ix1, iy1), Point(ix2, iy2));
+    return true;
+}
+\end{lstlisting}
+
+\paragraph{}
+Les opérations d'ordonnancement et d'intersection s'appuient sur les accesseurs/mutateurs de `Point`, montrant que le comportement global reste identique malgré la nouvelle représentation.
+
+\end{document}
